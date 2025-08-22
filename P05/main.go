@@ -45,6 +45,7 @@ func Sensor(ctx context.Context, sensorID string, n int, interval time.Duration)
 				// simulate ambient temperature around 25°C with noise
 				val := 25 + rand.NormFloat64()*8
 				r := Reading{SensorID: sensorID, Sequence: seq, Celsius: val, At: tm}
+				log.Printf("[sensor] created reading at: %s", r.At)
 
 				select {
 				case out <- r:
@@ -79,6 +80,7 @@ func Filter(ctx context.Context, in <-chan Reading, min, max, threshold float64,
 
 			if r.Celsius < min || r.Celsius > max || r.Celsius < threshold {
 				atomic.AddInt64(dropped, 1)
+				log.Printf("[filter] dropped reading at: %s, value: %f", r.At, r.Celsius)
 				continue
 			}
 			select {
